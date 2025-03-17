@@ -119,13 +119,13 @@ if(!isset($payment_line)){
 				@if(isset($view_page) || isset($edit_page))
 					{!! Form::select("payment[$row_index][method]", $payment_types, !empty($data[0]->t_method) ? $data[0]->t_method : null, ['class' => 'form-control
 
-					payment_types_dropdown select2', 'required', 'id' => "method_$row_index", 'style' => 'width:100%;',
+					payment_types_dropdown select2', 'required', 'onchange'=> "changeData(this.value)", 'id' => "method_$row_index", 'style' => 'width:100%;',
 
 					'placeholder' => __('messages.please_select')]); !!}
 				@else
 					{!! Form::select("payment[$row_index][method]", $payment_types, !empty($payment->method) ? $payment->method : null, ['class' => 'form-control
 
-					payment_types_dropdown select2', 'required', 'id' => "method_$row_index", 'style' => 'width:100%;',
+					payment_types_dropdown select2', 'required', 'onchange'=> "changeData(this.value)", 'id' => "method_$row_index", 'style' => 'width:100%;',
 
 					'placeholder' => __('messages.please_select')]); !!}
 				@endif

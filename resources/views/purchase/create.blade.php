@@ -516,6 +516,10 @@
 <script>
 
 
+	function changeData(e){
+		alert(e)
+	}
+
 $(document).ready(function(){
      $('#search_products').prop('disabled', true);
 
@@ -530,9 +534,9 @@ $(document).ready(function(){
         $('#search_products').prop('disabled', true);
       }
     });
-
   $(document).on('click', '#search_products', function () {
-        
+    
+
     if ($('#search_products').length >0) {
          var selectedSupplierId = $('#supplier_id').val();
         
