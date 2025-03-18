@@ -528,7 +528,9 @@ $bank_accounts = Account::where(['business_id'=>$business_id])->where(['asset_ty
 
 	function changeData(e){
 		if(e=='pre_payments'){
-			document.getElementById('prePayment').innerHTML = '<div class="col-md-3"><div class="input-group"><label for="ChequeNo">Cheque No.</label><input type="text" class="form-control" placeholder="Enter cheque no" name="chequeNo"></div></div><div class="col-md-3"><div class="input-group"><label for="ChequeDate">Cheque Date.</label><input class="form-control" type="date"  name="chequeDate"></div></div><div class="col-md-3"><div class="input-group"><div class="input-group"><label for="ChequeDate">Bank Data</label><select class="form-control" name="bankData">@if(!empty($bank_accounts))@foreach($bank_accounts as $bd)<option value="{{ $bd->id }}">{{ $bd->name }}</option>@endforeach @else <option value="">Please select</option> @endif</select></div></div>';
+			document.getElementById('prePayment').innerHTML = '<div class="col-md-3"><div class="input-group"><label for="ChequeNo">Cheque No.</label><input type="text" class="form-control" placeholder="Enter cheque no" name="payment[0][cheque_number]" id="cheque_number"></div></div><div class="col-md-3"><div class="input-group"><label for="ChequeDate">Cheque Date.</label><input class="form-control" type="date"  name="payment[0][cheque_date]"></div></div><div class="col-md-3"><div class="input-group"><div class="input-group"><label for="ChequeDate">Bank Data</label><select class="form-control" name="payment[0][account_id]">@if(!empty($bank_accounts))<option value="">Please select</option>@foreach($bank_accounts as $bd)<option value="{{ $bd->id }}">{{ $bd->name }}</option>@endforeach @else <option value="">Please select</option> @endif</select></div></div></div>';
+		}else{
+			document.getElementById('prePayment').innerHTML = '';
 		}
 	}
 
