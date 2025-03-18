@@ -148,8 +148,6 @@ if(!isset($payment_line)){
 					<i class="fa fa-money"></i>
 
 				</span>
-
-				
 				@if(isset($view_page) || isset($edit_page))
 					<input type="hidden" id="previous_acc_id_{{$row_index}}" class="previous_account" value="@if(!empty($data[0]->related_account_id)) {{$data[0]->related_account_id}} @elseif(!empty($data[0]->t_account_id)) {{$data[0]->t_account_id}} @endif">
 					{!! Form::select("payment[$row_index][account_id]", [], !empty($data[0]->related_account_id) ? $data[0]->related_account_id : (!empty($data[0]->t_account_id)? $data[0]->t_account_id : ''), ['class' =>
