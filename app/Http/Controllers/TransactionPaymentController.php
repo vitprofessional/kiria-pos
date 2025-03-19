@@ -191,6 +191,12 @@ class TransactionPaymentController extends Controller
 
     {
 
+        //get cheque number and date
+        $payments = $request->input('payment') ?? [];
+        $cheque_number  = $payments[0]['cheque_number'];
+        $cheque_date    = $payments[0]['cheque_date'];
+        $bank_details   = $payments[0]['account_id'];
+        
         try {
 
             $business_id = $request->session()->get('user.business_id');
@@ -400,6 +406,10 @@ class TransactionPaymentController extends Controller
                         'transaction_id' => !empty($transaction) ? $transaction->id : null,
 
                         'transaction_payment_id' =>  $tp->id,
+
+                        'cheque_numbers'=> $cheque_number,
+                        'cheque_date'   => $cheque_date,
+                        'bank_name'     => $bank_details,
                         
                         'post_dated_cheque' => $inputs['post_dated_cheque'] ?? 0,
                         'update_post_dated_cheque' => $inputs['update_post_dated_cheque'] ?? 0,
@@ -448,6 +458,10 @@ class TransactionPaymentController extends Controller
                         'transaction_id' => !empty($transaction) ? $transaction->id : null,
 
                         'transaction_payment_id' =>  $tp->id,
+
+                        'cheque_numbers'=> $cheque_number,
+                        'cheque_date'   => $cheque_date,
+                        'bank_name'     => $bank_details,
                         
                         'post_dated_cheque' => $inputs['post_dated_cheque'] ?? 0,
                         'update_post_dated_cheque' => $inputs['update_post_dated_cheque'] ?? 0,
@@ -1575,6 +1589,10 @@ class TransactionPaymentController extends Controller
                 'operation_date' => \Carbon::now(),
 
                 'created_by' => Auth::user()->id,
+
+                'cheque_numbers'=> $cheque_number,
+                'cheque_date'   => $cheque_date,
+                'bank_name'     => $bank_details,
 
                 'transaction_id' => $transaction->id
 

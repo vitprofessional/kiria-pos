@@ -1539,13 +1539,18 @@ class PurchaseController extends Controller
 
     {
 
+        // return $payments->cheque_number;
         if (!auth()->user()->can('purchase.create')) {
 
             abort(403, 'Unauthorized action.');
         }
+        
 
-
-
+        //get cheque number and date
+        $payments = $request->input('payment') ?? [];
+        $cheque_number  = $payments[0]['cheque_number'];
+        $cheque_date    = $payments[0]['cheque_date'];
+        $bank_details   = $payments[0]['account_id'];
 
 
         try {
@@ -1626,7 +1631,7 @@ class PurchaseController extends Controller
 
             $store_id = $request->input('store_id');
 
-            $transaction_data = $request->only(['is_vat', 'invoice_no', 'invoice_date', 'ref_no', 'status', 'contact_id', 'transaction_date', 'total_before_tax', 'location_id', 'discount_type', 'discount_amount', 'tax_id', 'tax_amount', 'shipping_details', 'shipping_charges', 'price_adjustment', 'final_total', 'additional_notes', 'exchange_rate', 'pay_term_number', 'pay_term_type']);
+            $transaction_data = $request->only(['is_vat', 'invoice_no', 'invoice_date', 'ref_no', 'status', 'contact_id', 'transaction_date', 'total_before_tax', 'location_id', 'discount_type', 'discount_amount', 'tax_id', 'tax_amount', 'shipping_details', 'shipping_charges', 'price_adjustment', 'final_total', 'additional_notes', 'exchange_rate', 'pay_term_number', 'pay_term_type','cheque_number','cheque_date','cheque_numbers','bank_name']);
 
 
 
@@ -1713,6 +1718,7 @@ class PurchaseController extends Controller
             $transaction_data['payment_status'] = 'due';
 
             $transaction_data['store_id'] = $request->input('store_id');
+            $transaction_data['store_id'] = $request->input('store_id');
 
             $transaction_data['transaction_date'] = $this->productUtil->uf_date($transaction_data['transaction_date'], true);
 
@@ -1792,6 +1798,9 @@ class PurchaseController extends Controller
                                     'transaction_id' => $transaction->id,
 
                                     'type' => 'credit',
+                                    'cheque_numbers' => $cheque_number,
+                                    'cheque_date' => $cheque_date,
+                                    'bank_name'     => $bank_details,
 
                                     'sub_type' => null,
 
@@ -1816,6 +1825,9 @@ class PurchaseController extends Controller
 
 
                                 $transaction_payment->is_deposited = 1;
+                                $transaction_payment->cheque_number = $cheque_number;
+                                $transaction_payment->cheque_date = $cheque_date;
+                                $transaction_payment->bank_name = $bank_details;
 
                                 $transaction_payment->save();
                             }
@@ -1864,10 +1876,6 @@ class PurchaseController extends Controller
 
 
 
-
-
-
-            $payments = $request->input('payment') ?? [];
 
 
 
