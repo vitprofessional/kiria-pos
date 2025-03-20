@@ -137,23 +137,27 @@
             @foreach ($fuelCategory as $categoryName)
                 <th colspan="2">{{ $categoryName }}</th>
             @endforeach
+                <th colspan="2">Total</th>
         </tr>
         <tr>
             @foreach ($fuelCategory as $categoryName)
                 <th colspan="2">@lang('mpcs::lang.tank_capacity')</th>
             @endforeach
+            <th colspan="2">@lang('mpcs::lang.tank_capacity')</th>
         </tr>
         <tr>
             @foreach ($fuelCategory as $categoryName)
                 <th>Qty</th>
                 <th>@lang('mpcs::lang.value_in_sale_price')</th>
             @endforeach
+                <th>Qty</th>
+                <th>@lang('mpcs::lang.value_in_sale_price')</th>
         </tr>
     </thead>
     <tbody>
     @foreach ($columnsArray as $colKey => $column)
 <tr>
-    @php $color = (($colKey == 'receipts' || $colKey == 'issue' || $colKey == 'pump_meters')) ? 'color: darkblue; font-weight: bold;': ''; @endphp
+    @php $color = (($colKey == 'receipts' || $colKey == 'issue' || $colKey == 'pump_meters')) ? 'color: #00c0ff; font-weight: bold;': ''; @endphp
     <td style="{{ $color }}">{{ $column }}</td>
 
     @if ($colKey == 'receipts' || $colKey == 'issue' || $colKey == 'pump_meters')  
@@ -163,17 +167,28 @@
             <input type="number" step="0.01" name="{{ $colKey }}[no]" class="full-width-input">
         </td>
 
+            @php
+                $x = 0;
+                $y = 0;
+            @endphp
         @foreach ($fuelCategory as $categoryKey => $categoryName)
             <td class="rows">
-                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][qty]" class="full-width-input">
+                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][qty]" class="full-width-input" value="1" readonly>
             </td>
             <td class="rows">
-                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][val]" class="full-width-input">
+                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][val]" value="2" class="full-width-input">
             </td>
-            <!-- <td class="rows">
-                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][dec]" class="full-width-input">
-            </td> -->
+            @php
+                $x += 1;
+                $y += 2;
+            @endphp
         @endforeach
+            <td class="rows">
+                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][qty]" class="full-width-input" value="{{ $x }}" readonly>
+            </td>
+            <td class="rows">
+                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][val]" value="{{ $y }}" class="full-width-input">
+            </td>
     @endif
 </tr>
 @endforeach
