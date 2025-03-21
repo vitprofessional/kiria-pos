@@ -99,6 +99,9 @@
             'receipts' => 'Receipts',
             'today' => 'Today',
             'previous_day' => 'Previous Day',
+            'price_increment_today' => 'Price Increment Today',
+            'price_increment_previous_day' => 'Price Increment Previous Day',
+            'previous_day' => 'Previous Day',
             'total_receipts' => 'Total Receipts',
             'opening_stock' => 'Opening Stock',
             'total_receipts_today' => 'Total Receipts Today', 
@@ -156,6 +159,7 @@
     </thead>
     <tbody>
     @foreach ($columnsArray as $colKey => $column)
+    
 <tr>
     @php $color = (($colKey == 'receipts' || $colKey == 'issue' || $colKey == 'pump_meters')) ? 'color: #00c0ff; font-weight: bold;': ''; @endphp
     <td style="{{ $color }}">{{ $column }}</td>
@@ -166,31 +170,93 @@
         <td class="rows">
             <input type="number" step="0.01" name="{{ $colKey }}[no]" class="full-width-input">
         </td>
+        @php
+            $TotalQty = 0;
+            $TotalAmount = 0;
+        @endphp
 
-            @php
-                $x = 0;
-                $y = 0;
-            @endphp
         @foreach ($fuelCategory as $categoryKey => $categoryName)
+        
+@php
+    //get category data to query product list
+    $catData = \App\Category::where(['name'=>'Fuel'])->first();
+    $subCatData = \App\Category::where(['name'=>$categoryName,'parent_id'=>$catData->id])->first();
+    $productData = \App\Product::where(['category_id'=>$catData->id,'sub_category_id'=>$subCatData->id])->first();
+
+    $columnName = $colKey;
+    
+    $qtyToday    = 0;
+    $amountToday = 0;
+
+    $qtyPrevDay    = 0;
+    $amountPrevDay = 0;
+
+    
+    //current date data show here
+    if($columnName == 'today'):
+
+        if($productData):
+            $qtyData = \App\PurchaseLine::where(['product_id'=>$productData->id])->whereDate('created_at', '=', date('Y-m-d'))->get();
+        else:
+            $qtyData = '';
+        endif;
+        if($qtyData):
+            $qtyTotal = $qtyData->sum('quantity');
+            $purchase_price = $qtyData->sum('purchase_price');
+            $amountTotal = round($purchase_price*$qtyTotal,2);
+        endif;
+    endif;
+
+    //previous date data show here
+    
+    if($columnName == 'previous_day'):
+
+        if($productData):
+            $qtyData = \App\PurchaseLine::where(['product_id'=>$productData->id])->whereDate('created_at', '=', date('Y-m-d', strtotime( '-1 days' )))->get();
+        else:
+            $qtyData = '';
+        endif;
+        if($qtyData):
+            $qtyTotal = $qtyData->sum('quantity');
+            $purchase_price = $qtyData->sum('purchase_price');
+            $amountTotal = round($purchase_price*$qtyTotal,2);
+        endif;
+    endif;
+
+    //previous date data show here
+
+    if($columnName == 'total_receipts'):
+        if($productData):
+            echo $qtyDataTotal = \App\PurchaseLine::where(['product_id'=>$productData->id])->whereDate('created_at', '=', date('Y-m-d'))->whereDate('created_at', '=', date('Y-m-d', strtotime( '-1 days' )))->get();
+        else:
+            $qtyDataTotal = '';
+        endif;
+        if($qtyDataTotal):
+            $qtyTotal = $qtyDataTotal->sum('quantity');
+            $purchase_price = $qtyDataTotal->sum('purchase_price');
+            $amountTotal = round($purchase_price*$qtyTotal,2);
+        endif;
+    endif;
+        
+    $TotalQty      += $qtyTotal;
+    $TotalAmount   += $amountTotal;
+    
+@endphp
             <td class="rows">
-                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][qty]" class="full-width-input" value="1" readonly>
+                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][qty]" class="full-width-input" value="{{ $qtyTotal }}" readonly>
             </td>
             <td class="rows">
-                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][val]" value="2" class="full-width-input">
+                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][val]" value="{{ $amountTotal }}" class="full-width-input">
             </td>
-            @php
-                $x += 1;
-                $y += 2;
-            @endphp
         @endforeach
             <td class="rows">
-                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][qty]" class="full-width-input" value="{{ $x }}" readonly>
+                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][qty]" class="full-width-input" value="{{ $TotalQty }}" readonly>
             </td>
             <td class="rows">
-                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][val]" value="{{ $y }}" class="full-width-input">
+                <input type="number" step="0.01" name="{{ $colKey }}[{{ $categoryKey }}][val]" value="{{ $TotalAmount }}" class="full-width-input">
             </td>
-    @endif
-</tr>
+        @endif
+    </tr>
 @endforeach
     </tbody>
 </table>
