@@ -167,14 +167,15 @@
     @if ($colKey == 'receipts' || $colKey == 'issue' || $colKey == 'pump_meters')  
         <td colspan="{{ count($fuelCategory) }}"></td>
     @else 
-        <td class="rows">
-            <input type="number" step="0.01" name="{{ $colKey }}[no]" class="full-width-input">
-        </td>
         @php
             $TotalQty = 0;
             $TotalAmount = 0;
+            $formNo = "F22";
         @endphp
 
+        <td class="rows">
+            <input type="text" name="{{ $colKey }}[no]" class="full-width-input" value="{{ $formNo }}" readonly>
+        </td>
         @foreach ($fuelCategory as $categoryKey => $categoryName)
         
 @php
@@ -184,12 +185,9 @@
     $productData = \App\Product::where(['category_id'=>$catData->id,'sub_category_id'=>$subCatData->id])->first();
 
     $columnName = $colKey;
-    
-    $qtyToday    = 0;
-    $amountToday = 0;
 
-    $qtyPrevDay    = 0;
-    $amountPrevDay = 0;
+    $today = date('Y-m-d');
+    $lastday = date('Y-m-d', strtotime( '-1 days' ));
 
     
     //current date data show here
@@ -227,14 +225,72 @@
 
     if($columnName == 'total_receipts'):
         if($productData):
-            echo $qtyDataTotal = \App\PurchaseLine::where(['product_id'=>$productData->id])->whereDate('created_at', '=', date('Y-m-d'))->whereDate('created_at', '=', date('Y-m-d', strtotime( '-1 days' )))->get();
+            $qtyDataToday = \App\PurchaseLine::where('product_id', '=', $productData->id)->whereDate('created_at', '=', now())->get();
+            $qtyDataYesterday = \App\PurchaseLine::where('product_id', '=', $productData->id)->whereDate('created_at', '=', $lastday)->get();
         else:
-            $qtyDataTotal = '';
+            $qtyDataToday = '';
+            $$qtyDataYesterday = '';
         endif;
-        if($qtyDataTotal):
-            $qtyTotal = $qtyDataTotal->sum('quantity');
-            $purchase_price = $qtyDataTotal->sum('purchase_price');
-            $amountTotal = round($purchase_price*$qtyTotal,2);
+        if($qtyDataToday && $qtyDataYesterday):
+            $qtyToday   = $qtyDataToday->sum('quantity');
+            $qtyPrev    = $qtyDataYesterday->sum('quantity');
+            $qtyTotal   = $qtyToday+$qtyPrev;
+            
+            $purchasePriceToday = $qtyDataToday->sum('purchase_price');
+            $purchasePricePrev  = $qtyDataYesterday->sum('purchase_price');
+            
+            $amountToday    = $purchasePriceToday*$qtyToday;
+            $amountPrev     = $purchasePricePrev*$qtyPrev;
+            $amountTotal    = round($amountToday+$amountPrev,2);
+        endif;
+    endif;
+
+    if($columnName == 'opening_stock'):
+
+        if($productData):
+            $stockData = \Modules\MPCS\Entities\FormF22Detail::where('product_code', '=', $productData->sku)->first();
+        else:
+            $stockData = '';
+        endif;
+        if($stockData == ''):
+            $qtyTotal = 0;
+        else:
+            $qtyTotal = $stockData->current_stock;
+        endif;
+    endif;
+    if($columnName == 'total_receipts_today'):
+        if($productData):
+            $qtyDataToday = \App\PurchaseLine::where('product_id', '=', $productData->id)->whereDate('created_at', '=', now())->get();
+            $qtyDataYesterday = \App\PurchaseLine::where('product_id', '=', $productData->id)->whereDate('created_at', '=', $lastday)->get();
+
+            
+            $stockData = \Modules\MPCS\Entities\FormF22Detail::where('product_code', '=', $productData->sku)->first();
+        else:
+            $qtyDataToday = '';
+            $$qtyDataYesterday = '';
+        endif;
+
+        if($stockData == ''): 
+            $qtyStock = 0;
+        elseif($qtyDataToday == ''):
+            $qtyTotal = 0;
+        elseif($qtyDataYesterday == ''):
+            $qtyTotal = 0;
+        else:
+            $qtyStock = $stockData->current_stock;
+        endif;
+
+        if($qtyDataToday && $qtyDataYesterday):
+            $qtyToday   = $qtyDataToday->sum('quantity');
+            $qtyPrev    = $qtyDataYesterday->sum('quantity');
+            $qtyTotal   = $qtyToday+$qtyPrev+$qtyStock;
+            
+            $purchasePriceToday = $qtyDataToday->sum('purchase_price');
+            $purchasePricePrev  = $qtyDataYesterday->sum('purchase_price');
+            
+            $amountToday    = $purchasePriceToday*$qtyToday;
+            $amountPrev     = $purchasePricePrev*$qtyPrev;
+            $amountTotal    = round($amountToday+$amountPrev,2);
         endif;
     endif;
         
